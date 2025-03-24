@@ -1,0 +1,17 @@
+services:
+  tarantool:
+    build:
+      context: deploy
+      dockerfile: Dockerfile
+    environment:
+      - USERNAME=${USERNAME}
+      - PASSWORD=${PASSWORD}
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./init.lua:/opt/tarantool/init.lua
+      - tarantool_data:/var/lib/tarantool
+    restart: unless-stopped
+
+volumes:
+  tarantool_data:
