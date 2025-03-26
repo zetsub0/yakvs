@@ -9,9 +9,9 @@ import (
 )
 
 type Config struct {
-	Env        string     `yaml:"env" env:"YAKVS_ENV" env-default:"local"`
-	HttpServer HTTPServer `yaml:"http_server" env:"YAKVS_HTTP_SERVER"`
-	Tarantool  Tarantool  `yaml:"tarantool" env:"YAKVS_TARANTOOL"`
+	Env        string     `yaml:"env" env-default:"local"`
+	HttpServer HTTPServer `yaml:"http_server"`
+	Tarantool  Tarantool  `yaml:"tarantool"`
 }
 
 type HTTPServer struct {
@@ -23,11 +23,13 @@ type HTTPServer struct {
 }
 
 type Tarantool struct {
-	Host     string `yaml:"host"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+	Host     string        `yaml:"host"`
+	User     string        `yaml:"user"`
+	Password string        `yaml:"password"`
+	Timeout  time.Duration `yaml:"timeout"`
 }
 
+// ParseConfig parses config from yaml to Config
 func ParseConfig() *Config {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {

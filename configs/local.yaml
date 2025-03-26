@@ -10,4 +10,5 @@ tarantool:
   host: "0.0.0.0:3301"
   user: "user"
   password: "password"
+  timeout: "1m"
   

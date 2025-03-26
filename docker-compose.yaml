@@ -1,11 +1,11 @@
 services:
   tarantool:
     build:
-      context: deploy
+      context: .
       dockerfile: Dockerfile
     environment:
-      - USERNAME=${USERNAME}
-      - PASSWORD=${PASSWORD}
+      - USERNAME=USERNAME
+      - PASSWORD=PASSWORD
     ports:
       - "3301:3301"
     volumes:
