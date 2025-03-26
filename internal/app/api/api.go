@@ -28,7 +28,7 @@ func NewAPI(kvm KVM) *API {
 func NewHandler(api *API) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /kv/{id}", api.CreateKV)
+	mux.HandleFunc("POST /kv", api.CreateKV)
 	mux.HandleFunc("GET /kv/{id}", api.GetKV)
 
 	return mux
@@ -41,13 +41,11 @@ func NewHandler(api *API) http.Handler {
 //			400 - if body malformed
 func (a *API) CreateKV(w http.ResponseWriter, r *http.Request) {
 
-	kv := &models.KV{
-		Key: r.PathValue("id"),
-	}
+	kv := &models.KV{}
 
-	err := json.NewDecoder(r.Body).Decode(&kv.Value)
+	err := json.NewDecoder(r.Body).Decode(kv)
 	if err != nil {
-		slog.Warn("got malformed body!", "user", r.RemoteAddr)
+		slog.Warn("got malformed body!", "err", err, "user", r.RemoteAddr)
 		sendJSONResponse(
 			w,
 			http.StatusBadRequest,
