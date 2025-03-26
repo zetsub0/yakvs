@@ -13,8 +13,10 @@ import (
 // KVM - key-value manager
 type KVM interface {
 	CreateValue(kv *models.KV) error
+	GetValue(key string) (*models.KV, error)
 }
 
+// API contains http handlers
 type API struct {
 	kvm KVM
 }
@@ -27,6 +29,7 @@ func NewHandler(api *API) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /kv/{id}", api.CreateKV)
+	mux.HandleFunc("GET /kv/{id}", api.GetKV)
 
 	return mux
 }
@@ -85,4 +88,42 @@ func (a *API) CreateKV(w http.ResponseWriter, r *http.Request) {
 			Code: http.StatusCreated,
 			Info: "pair successfully created",
 		})
+}
+
+// GetKV calls manager's GetValue method.
+// Returns:
+//			200 - if all is okay
+//			404 - if KV not found
+func (a *API) GetKV(w http.ResponseWriter, r *http.Request) {
+
+	kv, err := a.kvm.GetValue(r.PathValue("id"))
+	if err != nil {
+		if errors.Is(err, errs.ErrNoKeys) {
+			sendJSONResponse(
+				w,
+				http.StatusNotFound,
+				errResponse{
+					Code:  http.StatusNotFound,
+					Error: "key not found",
+				},
+			)
+			return
+		}
+		sendJSONResponse(
+			w,
+			http.StatusInternalServerError,
+			errResponse{
+				Code:  http.StatusInternalServerError,
+				Error: err.Error(),
+			},
+		)
+		return
+	}
+
+	sendJSONResponse(
+		w,
+		http.StatusOK,
+		kv,
+	)
+	return
 }
