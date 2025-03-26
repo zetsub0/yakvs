@@ -12,6 +12,7 @@ import (
 type Storage interface {
 	GetPairByKey(key string) (*models.KV, error)
 	SetPair(kv *models.KV) error
+	ReplacePair(kv *models.KV) error
 }
 
 // Manager ...
@@ -49,4 +50,18 @@ func (m *Manager) GetValue(key string) (*models.KV, error) {
 	}
 
 	return pair, nil
+}
+
+// UpdateValue replaces KV by key in storage.
+func (m *Manager) UpdateValue(kv *models.KV) error {
+	err := m.storage.ReplacePair(kv)
+	if err != nil {
+		if errors.Is(err, errs.ErrKeyExists) {
+			slog.Error("Error while updating kv. Key already exists", "key:", kv.Key)
+		}
+		return errs.Wrap(err)
+	}
+
+	slog.Info("Pair successfully updated. Key:", "key:", kv.Key)
+	return nil
 }

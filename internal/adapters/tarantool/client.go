@@ -46,12 +46,12 @@ func New(ctx context.Context, cfg config.Tarantool) *Tarantool {
 // SetPair inserts nev kv to vault.
 func (t *Tarantool) SetPair(kv *models.KV) error {
 
-	res, err := t.getPairByKey(kv.Key)
+	dbKV, err := t.getPairByKey(kv.Key)
 	if err != nil && !errors.Is(err, errs.ErrNoKeys) {
 		return errs.Wrapf(err, "error got while validating key")
 	}
 
-	if res != nil {
+	if dbKV != nil {
 		return errs.Wrap(errs.ErrKeyExists)
 	}
 
@@ -72,10 +72,37 @@ func (t *Tarantool) GetPairByKey(key string) (*models.KV, error) {
 	return t.getPairByKey(key)
 }
 
+// ReplacePair replaces KV if it exists in vault.
+func (t *Tarantool) ReplacePair(kv *models.KV) error {
+
+	_, err := t.getPairByKey(kv.Key)
+	if err != nil {
+		if !errors.Is(err, errs.ErrNoKeys) {
+			return errs.Wrapf(err, "error got while validating key")
+
+		} else {
+			return errs.Wrap(err)
+		}
+	}
+
+	tuple := []any{kv.Key, kv.Value}
+
+	req := tarantool.NewReplaceRequest(space).Tuple(tuple)
+
+	_, err = t.client.Do(req).Get()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+
+	return nil
+}
+
 // getPairByKey is internal method that returns kv from vault by inputted key.
 func (t *Tarantool) getPairByKey(key string) (*models.KV, error) {
 
-	res, err := t.client.Do(tarantool.NewSelectRequest(space).Key([]any{key})).Get()
+	req := tarantool.NewSelectRequest(space).Key([]any{key})
+
+	res, err := t.client.Do(req).Get()
 	if err != nil {
 		return nil, errs.Wrap(err)
 	}
