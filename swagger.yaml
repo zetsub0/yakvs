@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+  title: Key-Value Store API
+  description: A simple API for managing key-value pairs
+  version: 1.0.0
+servers:
+  - url: "http://3890887-uz77054.twc1.net:8080"
+    description: Production server
+paths:
+  /kv/:
+    post:
+      summary: Create a new key-value pair
+      operationId: createKV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KV'
+      responses:
+        '201':
+          description: Key-value pair successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Malformed request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Key already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /kv/{id}:
+    get:
+      summary: Retrieve a key-value pair
+      operationId: getKV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The key to retrieve
+      responses:
+        '200':
+          description: Key-value pair found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KV'
+        '404':
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update an existing key-value pair
+      operationId: putKV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The key to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: object
+                  description: The new value (can be any JSON value)
+      responses:
+        '200':
+          description: Key-value pair successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Malformed request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a key-value pair
+      operationId: deleteKV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The key to delete
+      responses:
+        '200':
+          description: Key-value pair successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    KV:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: The key of the key-value pair
+        value:
+          type: object
+          description: The value (can be any JSON value)
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - error
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+        error:
+          type: string
+          description: Error message
+    SuccessResponse:
+      type: object
+      required:
+        - code
+        - info
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+        info:
+          type: string
+          description: Success message
