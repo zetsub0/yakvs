@@ -97,6 +97,28 @@ func (t *Tarantool) ReplacePair(kv *models.KV) error {
 	return nil
 }
 
+// DeletePairByKey deletes KV if it exists in vault.
+func (t *Tarantool) DeletePairByKey(key string) error {
+	_, err := t.getPairByKey(key)
+	if err != nil {
+		if !errors.Is(err, errs.ErrNoKeys) {
+			return errs.Wrapf(err, "error got while validating key")
+
+		} else {
+			return errs.Wrap(err)
+		}
+	}
+
+	req := tarantool.NewDeleteRequest(space).Key([]any{key})
+
+	_, err = t.client.Do(req).Get()
+	if err != nil {
+		return errs.Wrap(err)
+	}
+
+	return nil
+}
+
 // getPairByKey is internal method that returns kv from vault by inputted key.
 func (t *Tarantool) getPairByKey(key string) (*models.KV, error) {
 
