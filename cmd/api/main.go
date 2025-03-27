@@ -7,8 +7,8 @@ import (
 	"github.com/zetsub0/yakvs/internal/adapters/tarantool"
 	"github.com/zetsub0/yakvs/internal/app/api"
 	"github.com/zetsub0/yakvs/internal/app/http"
-	"github.com/zetsub0/yakvs/internal/app/logger"
 	"github.com/zetsub0/yakvs/internal/config"
+	"github.com/zetsub0/yakvs/internal/logger"
 	"github.com/zetsub0/yakvs/internal/modules/manager"
 )
 

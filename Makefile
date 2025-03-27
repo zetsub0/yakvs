@@ -1,7 +1,13 @@
-up:
-	docker compose up -d
+_COMPOSE= docker compose -f ./deploy/docker-compose.yaml --env-file ./deploy/compose.env
 
+.PHONY:up
+up:
+	${_COMPOSE} up --build -d
+
+.PHONY:dev
+dev:
+	${_COMPOSE} --profile deps up -d
+
+.PHONY:down
 down:
-	docker compose down
-	docker volume rm yatc_tarantool_data
-	docker rmi yatc-tarantool
+	${_COMPOSE} down -v --remove-orphans
