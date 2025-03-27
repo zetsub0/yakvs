@@ -31,7 +31,7 @@ func NewHandler(api *API) http.Handler {
 	mux.HandleFunc("POST /kv/{id}", api.CreateKV)
 	mux.HandleFunc("GET /kv/{id}", api.GetKV)
 
-	return mux
+	return checkJSONContentType(mux)
 }
 
 // CreateKV calls manager's CreateValue method.
