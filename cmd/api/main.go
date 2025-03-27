@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"log/slog"
-	"os"
 
 	"github.com/zetsub0/yakvs/internal/adapters/tarantool"
 	"github.com/zetsub0/yakvs/internal/app/api"
 	"github.com/zetsub0/yakvs/internal/app/http"
+	"github.com/zetsub0/yakvs/internal/app/logger"
 	"github.com/zetsub0/yakvs/internal/config"
 	"github.com/zetsub0/yakvs/internal/modules/manager"
 )
@@ -20,9 +20,8 @@ func main() {
 
 	store := tarantool.New(ctx, cfg.Tarantool)
 
-	logger := setupLogger(cfg.Env)
-
-	slog.SetDefault(logger)
+	log := logger.SetupLogger(cfg.Env)
+	slog.SetDefault(log)
 
 	mng := manager.New(store)
 
@@ -32,31 +31,4 @@ func main() {
 
 	srv.Run(ctx)
 
-}
-
-func setupLogger(env string) *slog.Logger {
-
-	opts := &slog.HandlerOptions{
-		AddSource: true,
-		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
-			if a.Key == "file" {
-				return slog.Attr{}
-			}
-			return a
-		},
-	}
-
-	switch env {
-	case "dev":
-		opts.Level = slog.LevelDebug
-	case "local":
-		opts.Level = slog.LevelDebug
-	case "prod":
-		opts.Level = slog.LevelError
-	}
-
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-
-	logger := slog.New(handler)
-	return logger
 }
