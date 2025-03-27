@@ -13,6 +13,7 @@ type Storage interface {
 	GetPairByKey(key string) (*models.KV, error)
 	SetPair(kv *models.KV) error
 	ReplacePair(kv *models.KV) error
+	DeletePairByKey(key string) error
 }
 
 // Manager ...
@@ -56,12 +57,26 @@ func (m *Manager) GetValue(key string) (*models.KV, error) {
 func (m *Manager) UpdateValue(kv *models.KV) error {
 	err := m.storage.ReplacePair(kv)
 	if err != nil {
-		if errors.Is(err, errs.ErrKeyExists) {
-			slog.Error("Error while updating kv. Key already exists", "key:", kv.Key)
+		if errors.Is(err, errs.ErrNoKeys) {
+			slog.Error("Error while updating kv. Key not found", "key:", kv.Key)
 		}
 		return errs.Wrap(err)
 	}
 
 	slog.Info("Pair successfully updated. Key:", "key:", kv.Key)
+	return nil
+}
+
+// DeleteValue deletes KV by key in storage.
+func (m *Manager) DeleteValue(key string) error {
+	err := m.storage.DeletePairByKey(key)
+	if err != nil {
+		if errors.Is(err, errs.ErrNoKeys) {
+			slog.Error("Error while updating kv. Key not found", "key:", key)
+		}
+		return errs.Wrap(err)
+	}
+
+	slog.Info("Pair successfully deleted. Key:", "key:", key)
 	return nil
 }
