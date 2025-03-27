@@ -35,7 +35,7 @@ func NewHandler(api *API) http.Handler {
 	mux.HandleFunc("PUT /kv/{id}", api.PutKV)
 	mux.HandleFunc("DELETE /kv/{id}", api.DeleteKV)
 
-	return mux
+	return logReq(mux)
 }
 
 // CreateKV calls manager's CreateValue method.
@@ -140,6 +140,7 @@ func (a *API) GetKV(w http.ResponseWriter, r *http.Request) {
 //			404 - if key not found
 //			500 - if got internal error
 func (a *API) PutKV(w http.ResponseWriter, r *http.Request) {
+
 	kv := &models.KV{
 		Key: r.PathValue("id"),
 	}
@@ -197,6 +198,7 @@ func (a *API) PutKV(w http.ResponseWriter, r *http.Request) {
 //			404 - if key not found
 //			500 - if got internal error
 func (a *API) DeleteKV(w http.ResponseWriter, r *http.Request) {
+
 	key := r.PathValue("id")
 
 	err := a.kvm.DeleteValue(key)

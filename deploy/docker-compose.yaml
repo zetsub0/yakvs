@@ -1,0 +1,43 @@
+services:
+  tarantool:
+    image: tarantool/tarantool:2.11.5
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./tarantool/init.lua:/init.lua
+      - ./tarantool/data:/var/lib/tarantool
+    command: ["tarantool", "/init.lua"]
+    environment:
+      - TARANTOOL_USER_NAME=${TARANTOOL_USER_NAME}
+      - TARANTOOL_USER_PASSWORD=${TARANTOOL_USER_PASSWORD}
+    env_file:
+      - compose.env
+    networks:
+      - app-network
+    profiles:
+      - deps
+      - ''
+
+  app:
+    build:
+      context: ../
+      dockerfile: ./deploy/app/Dockerfile
+    volumes:
+      - "../.env:/root/.env"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tarantool
+    restart: unless-stopped
+    networks:
+      - app-network
+    profiles:
+      - app
+      - ''
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  tarantool_data:

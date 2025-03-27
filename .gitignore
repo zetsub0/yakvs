@@ -29,3 +29,5 @@ go.work.sum
 .vscode
 .DS_Store
 **/.DS_Store
+*.env
+deploy/tarantool/data
